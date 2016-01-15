@@ -5,10 +5,10 @@
         "WEATHER_TEMPERATURE_KEY": 1
     },
     "capabilities": [
-        ""
+        "configurable"
     ],
     "companyName": "Pebble Technology",
-    "longName": "PebbleJS Weather",
+    "longName": "Pebble JS Weather",
     "projectType": "native",
     "resources": {
         "media": [
@@ -35,7 +35,7 @@
         ]
     },
     "sdkVersion": "3",
-    "shortName": "PebbleJS Weather",
+    "shortName": "JS Weather",
     "targetPlatforms": [
         "aplite",
         "basalt",

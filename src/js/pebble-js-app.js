@@ -1,5 +1,3 @@
-var myAPIKey = '';
-
 function iconFromWeatherId(weatherId) {
   if (weatherId < 600) {
     return 2;
@@ -15,7 +13,7 @@ function iconFromWeatherId(weatherId) {
 function fetchWeather(latitude, longitude) {
   var req = new XMLHttpRequest();
   req.open('GET', 'http://api.openweathermap.org/data/2.5/weather?' +
-    'lat=' + latitude + '&lon=' + longitude + '&cnt=1&appid=' + myAPIKey, true);
+    'lat=' + latitude + '&lon=' + longitude + '&cnt=1&appid=' + localStorage['openweathermap-api-key'], true);
   req.onload = function () {
     if (req.readyState === 4) {
       if (req.status === 200) {
@@ -60,21 +58,43 @@ var locationOptions = {
 
 Pebble.addEventListener('ready', function (e) {
   console.log('connect!' + e.ready);
-  window.navigator.geolocation.getCurrentPosition(locationSuccess, locationError,
-    locationOptions);
-  console.log(e.type);
+  if(localStorage['openweathermap-api-key']) {
+    window.navigator.geolocation.getCurrentPosition(locationSuccess, locationError,
+      locationOptions);
+    console.log(e.type);
+  } else {
+    console.log('OpenWeatherMap API key required!');
+  }   
 });
 
 Pebble.addEventListener('appmessage', function (e) {
-  window.navigator.geolocation.getCurrentPosition(locationSuccess, locationError,
+  if(localStorage['openweathermap-api-key']) {
+    window.navigator.geolocation.getCurrentPosition(locationSuccess, locationError,
     locationOptions);
-  console.log(e.type);
-  console.log(e.payload.temperature);
-  console.log('message!');
+    console.log(e.type);
+    console.log(e.payload.temperature);
+    console.log('message!');
+  } else {
+    console.log('OpenWeatherMap API key required!');
+  }
+});
+
+Pebble.addEventListener('showConfiguration', function(e) {
+  // Show config page
+  Pebble.openURL('https://rawgit.com/idiotandrobot/pebble-weather/master/config/index.html');
 });
 
 Pebble.addEventListener('webviewclosed', function (e) {
-  console.log('webview closed');
-  console.log(e.type);
-  console.log(e.response);
+  // Decode and parse config data as JSON
+  var config_data = JSON.parse(decodeURIComponent(e.response));
+  console.log('Config window returned: ', JSON.stringify(config_data));
+  
+  localStorage['openweathermap-api-key'] = config_data['openweathermap-api-key'];
+  
+  if(localStorage['openweathermap-api-key']) {
+    window.navigator.geolocation.getCurrentPosition(locationSuccess, locationError,
+    locationOptions);
+  } else {
+    console.log('OpenWeatherMap API key still required!');
+  }  
 });
