@@ -5,6 +5,7 @@
         "WEATHER_TEMPERATURE_KEY": 1
     },
     "capabilities": [
+        "location",
         "configurable"
     ],
     "companyName": "Pebble Technology",
