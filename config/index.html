@@ -25,7 +25,7 @@
         <div class="item-container-content">
             <label class="item">
             <div class="item-input-wrapper">
-                <input type="text" class="item-input" name="openweathermap-api-key" placeholder="Enter OpenWeatherMap API key">
+                <input type="text" class="item-input" id="openweathermap-api-key-input" placeholder="Enter OpenWeatherMap API key">
             </div>
             </label>
         </div>
@@ -40,7 +40,7 @@
   <script>
   
   function getConfigData() {
-    var openWeatherMapApiKeyInput = document.getElementById('openweathermap-api-key');
+    var openWeatherMapApiKeyInput = document.getElementById('openweathermap-api-key-input');
  
     var options = {
       'openweathermap-api-key': openWeatherMapApiKeyInput.value,
@@ -70,7 +70,7 @@
     document.location = return_to + encodeURIComponent(JSON.stringify(getConfigData()));
   });
   (function() {
-    var openWeatherMapApiKeyInput = document.getElementById('openweathermap-api-key');
+    var openWeatherMapApiKeyInput = document.getElementById('openweathermap-api-key-input');
     // Load any previously saved configuration, if available
     if(localStorage['openweathermap-api-key']) {
       openWeatherMapApiKeyInput.value = localStorage['openweathermap-api-key'];
