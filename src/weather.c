@@ -1,5 +1,8 @@
 #include "pebble.h"
 
+#define MyTupletCString(_key, _cstring) \
+((const Tuplet) { .type = TUPLE_CSTRING, .key = _key, .cstring = { .data = _cstring, .length = strlen(_cstring) + 1 }})
+
 static Window *s_main_window;
 
 static TextLayer *s_temperature_layer;
@@ -23,6 +26,10 @@ static const uint32_t WEATHER_ICONS[] = {
   RESOURCE_ID_IMAGE_SNOW // 3
 };
 
+static uint8_t s_weather_icon;
+static char s_weather_temp[8];
+static char s_weather_city[64];
+
 static void sync_error_callback(DictionaryResult dict_error, AppMessageResult app_message_error, void *context) {
   APP_LOG(APP_LOG_LEVEL_DEBUG, "App Message Sync Error: %d", app_message_error);
 }
@@ -34,18 +41,22 @@ static void sync_tuple_changed_callback(const uint32_t key, const Tuple* new_tup
         gbitmap_destroy(s_icon_bitmap);
       }
 
-      s_icon_bitmap = gbitmap_create_with_resource(WEATHER_ICONS[new_tuple->value->uint8]);
+      s_weather_icon = new_tuple->value->uint8;
+      s_icon_bitmap = gbitmap_create_with_resource(WEATHER_ICONS[s_weather_icon]);
       bitmap_layer_set_compositing_mode(s_icon_layer, GCompOpSet);
       bitmap_layer_set_bitmap(s_icon_layer, s_icon_bitmap);
       break;
 
     case WEATHER_TEMPERATURE_KEY:
       // App Sync keeps new_tuple in s_sync_buffer, so we may use it directly
-      text_layer_set_text(s_temperature_layer, new_tuple->value->cstring);
+      snprintf(s_weather_temp, sizeof(s_weather_temp), "%s", new_tuple->value->cstring);
+      text_layer_set_text(s_temperature_layer, s_weather_temp);
       break;
 
     case WEATHER_CITY_KEY:
-      text_layer_set_text(s_city_layer, new_tuple->value->cstring);
+      snprintf(s_weather_city, sizeof(s_weather_city), "%s", new_tuple->value->cstring);
+    
+      text_layer_set_text(s_city_layer, s_weather_city);
       break;
   }
 }
@@ -88,9 +99,9 @@ static void window_load(Window *window) {
   layer_add_child(window_layer, text_layer_get_layer(s_city_layer));
 
   Tuplet initial_values[] = {
-    TupletInteger(WEATHER_ICON_KEY, (uint8_t) 1),
-    TupletCString(WEATHER_TEMPERATURE_KEY, "1234\u00B0C"),
-    TupletCString(WEATHER_CITY_KEY, "St Pebblesburg"),
+    TupletInteger(WEATHER_ICON_KEY, s_weather_icon),
+    MyTupletCString(WEATHER_TEMPERATURE_KEY, s_weather_temp),
+    MyTupletCString(WEATHER_CITY_KEY, s_weather_city),
   };
 
   app_sync_init(&s_sync, s_sync_buffer, sizeof(s_sync_buffer),
@@ -111,6 +122,19 @@ static void window_unload(Window *window) {
 }
 
 static void init(void) {
+  
+  s_weather_icon = persist_exists(WEATHER_ICON_KEY) ? persist_read_bool(WEATHER_ICON_KEY) : (uint8_t) 1;
+  if (persist_exists(WEATHER_TEMPERATURE_KEY)) {
+    persist_read_string(WEATHER_TEMPERATURE_KEY, s_weather_temp, sizeof(s_weather_temp));
+  } else {
+    snprintf(s_weather_temp, sizeof(s_weather_temp), "%s", "1234\u00B0C");
+  }
+  if (persist_exists(WEATHER_CITY_KEY)) {
+    persist_read_string(WEATHER_CITY_KEY, s_weather_city, sizeof(s_weather_city));
+  } else {
+    snprintf(s_weather_city, sizeof(s_weather_city), "%s", "St Pebblesburg");
+  }
+  
   s_main_window = window_create();
   window_set_background_color(s_main_window, PBL_IF_COLOR_ELSE(GColorIndigo, GColorBlack));
   window_set_window_handlers(s_main_window, (WindowHandlers) {
@@ -123,6 +147,10 @@ static void init(void) {
 }
 
 static void deinit(void) {
+  persist_write_int(WEATHER_ICON_KEY, s_weather_icon);
+  persist_write_string(WEATHER_TEMPERATURE_KEY, s_weather_temp);
+  persist_write_string(WEATHER_CITY_KEY, s_weather_city);
+  
   window_destroy(s_main_window);
 
   app_sync_deinit(&s_sync);
