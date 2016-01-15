@@ -4,3 +4,5 @@ Copy of [pebble-examples](https://github.com/pebble-examples)/[pebblekit-js-weat
 
 - OpenWeatherMap API Key configuration and persistence
 - Weather value persistence
+
+Uses static char to TupletCString workaround discussed [here](https://forums.getpebble.com/discussion/10690/the-address-of-will-always-evaluate-as-true)
