@@ -1,6 +1,6 @@
 # pebble-weather
 
-Copy of [pebble-examples](https://github.com/pebble-examples)/[pebblekit-js-weather](https://github.com/pebble-examples/pebblekit-js-weather) with the additional functionality.
+Copy of [pebble-examples](https://github.com/pebble-examples)/[pebblekit-js-weather](https://github.com/pebble-examples/pebblekit-js-weather) with additional functionality.
 
 - [Slate App Configuration](https://developer.getpebble.com/tutorials/intermediate/slate/)
 - [OpenWeatherMap](http://openweathermap.org) API Key configuration and persistence
